@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speech-to-Text and Text-to-Speech</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Speech and Text Converter</h1>
+
+        <!-- Speech to Text Section -->
+        <section>
+            <h2>Speech to Text</h2>
+            <button id="speech-to-text-btn">Start Listening</button>
+            <p id="speech-output"></p>
+        </section>
+
+        <!-- Text to Speech Section -->
+        <section>
+            <h2>Text to Speech</h2>
+            <textarea id="text-to-speech-input" placeholder="Type text here..."></textarea>
+            <button id="text-to-speech-btn">Convert to Speech</button>
+        </section>
+    </div>
+
+    <script>
+        // Speech-to-Text
+        document.getElementById("speech-to-text-btn").addEventListener("click", async () => {
+            const output = document.getElementById("speech-output");
+            output.innerText = "Listening...";
+            try {
+                const response = await fetch("/speech_to_text", { method: "POST" });
+                const data = await response.json();
+                if (data.success) {
+                    output.innerText = "You said: " + data.text;
+                } else {
+                    output.innerText = "Error: " + data.error;
+                }
+            } catch (err) {
+                output.innerText = "Error connecting to the server.";
+            }
+        });
+
+        // Text-to-Speech
+        document.getElementById("text-to-speech-btn").addEventListener("click", async () => {
+            const input = document.getElementById("text-to-speech-input").value;
+            try {
+                const response = await fetch("/text_to_speech", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ text: input })
+                });
+                const data = await response.json();
+                if (!data.success) {
+                    alert("Error: " + data.error);
+                }
+            } catch (err) {
+                alert("Error connecting to the server.");
+            }
+        });
+    </script>
+</body>
+</html>
